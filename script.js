@@ -1,6 +1,6 @@
 // Configuration
-const TOTAL_QUESTIONS = 100; // Total number of questions
-const PERCENT_YES_ANSWERS = 40; // Percentage of "Yes" answers
+const TOTAL_QUESTIONS = 50; // Total number of questions
+const PERCENT_YES_ANSWERS = 55; // Percentage of "Yes" answers
 TIME_PER_QUESTION = 30; // Time per question in seconds
 
 // Derived configuration
