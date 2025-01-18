@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divisibility Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Divisibility Test</h1>
+  <div class="timer">Time Remaining: <span id="timer">50:00</span></div>
+  <div class="container">
+    <div class="left-panel">
+      <canvas id="progress-chart"></canvas>
+      <div class="scoreboard">
+        Current Score: <span class="score" id="current-score">0</span> / <span id="answered-questions">0</span>
+      </div>
+    </div>
+    <div class="right-panel" id="quiz">
+      <div class="question" id="question">Press "Start" to begin the quiz!</div>
+      <div id="question-number"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="buttons">
+        <button id="start-btn">Start</button>
+        <button id="yes-btn" disabled>Yes</button>
+        <button id="no-btn" disabled>No</button>
+      </div>
+    </div>
+  </div>
+  <div id="result">
+    <p class="score" id="final-score"></p>
+    <button onclick="location.reload()">Restart</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
