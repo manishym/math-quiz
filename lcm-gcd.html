@@ -101,16 +101,20 @@
     <script>
         let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
         let questions = [], timePerQuestion, numQuestions;
+        var timeLeft;
+        const timerBar = document.getElementById('timer-progress');
 
 
 
 
         function generateQuestion() {
             const primes = [2, 3, 5, 7, 11, 13, 17, 19]
-            const common_factor = primes[Math.floor(Math.random() * primes.length)];
+            const common_factor = primes[Math.floor(Math.random() * primes.length)] * primes[Math.floor(Math.random() * primes.length)];
             const a = (Math.floor(Math.random() * 10) + 1) * common_factor
-            const b = (Math.floor(Math.random() * 10) + 10) * common_factor
-            
+            let b = (Math.floor(Math.random() * 10) + 10) * common_factor
+            while (b == a) {
+                let b = (Math.floor(Math.random() * 10) + 10) * common_factor
+            }
             console.log(a, b);
             const gcd = (x, y) => {
                 console.log(x, y);
@@ -123,15 +127,29 @@
             const questionText = `Find the ${gcd_or_lcm ? 'GCD' : 'LCM'} of ${a} and ${b}`;
             console.log("Current question: a:", a, "b: ", b);
 
-            const options = new Array(4).fill(0).map(() => Math.floor(Math.random() * 50) + 1);
+            const options = [];
+            const variance = Math.floor(correctAnswer * 0.2); // 20% of the correct answer as variance
+
+            while (options.length < 4) {
+                // Generate options around the correct answer
+                const offset = Math.floor(Math.random() * (2 * variance + 1)) - variance; // Random number within ±variance
+                const option = correctAnswer + offset;
+
+                // Avoid duplicates and negative options
+                if (!options.includes(option) && option > 0) {
+                    options.push(option);
+                }
+        }
             if (!options.includes(correctAnswer)) options[Math.floor(Math.random() * 4)] = correctAnswer;
 
             return { questionText, options, correctAnswer };
         }
 
         function startQuiz() {
-            numQuestions = 50;
-            timePerQuestion = 60;
+            
+            numQuestions = 25;
+            timePerQuestion = 180;
+            timeLeft = timePerQuestion*numQuestions
             questions = Array.from({ length: numQuestions }, generateQuestion);
 
             document.getElementById('quiz-container').style.display = 'block';
@@ -144,6 +162,7 @@
 
             updateProgressBars();
             loadQuestion();
+            startTimer();
         }
 
         function loadQuestion() {
@@ -163,8 +182,9 @@
                 button.onclick = () => handleAnswer(option);
                 container.appendChild(button);
             });
+            updateTimer();
 
-            startTimer();
+            
         }
 
         function handleAnswer(selectedOption) {
@@ -188,20 +208,18 @@
             renderTable();
         }
 
-        function startTimer() {
-            let timeLeft = timePerQuestion*numQuestions;
-            const timerBar = document.getElementById('timer-progress');
-
-            function updateTimer() {
-                if (timeLeft <= 0) {
-                    handleAnswer(null); // Timeout treated as an incorrect answer
-                } else {
-                    timeLeft--;
-                    timerBar.style.width = `${(timeLeft / timePerQuestion) * 100}%`;
-                    timer = setTimeout(updateTimer, 1000);
-                }
+        function updateTimer() {
+            console.log("Total time: ", timePerQuestion*numQuestions, " current time left: ", timeLeft)
+            if (timeLeft <= 0) {
+                handleAnswer(null); // Timeout treated as an incorrect answer
+            } else {
+                timeLeft--;
+                timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
+                timer = setTimeout(updateTimer, 1000);
             }
+        }
 
+        function startTimer() {
             timerBar.style.width = '100%';
             updateTimer();
         }
