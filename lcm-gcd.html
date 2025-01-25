@@ -108,44 +108,47 @@
 
 
         function generateQuestion() {
-            const primes = [2, 3, 5, 7, 11, 13]
+            const primes = [2, 3, 5, 7, 11, 13];
             const common_factor = primes[Math.floor(Math.random() * primes.length)] * primes[Math.floor(Math.random() * primes.length)];
-            const a = (Math.floor(Math.random() * 10) + 1) * common_factor
-            let b = (Math.floor(Math.random() * 10) + 10) * common_factor
-            while (b == a) {
-                b = (Math.floor(Math.random() * 10) + 10) * common_factor
+            const a = (Math.floor(Math.random() * 10) + 1) * common_factor;
+            let b = (Math.floor(Math.random() * 10) + 10) * common_factor;
+
+            while (b === a) {
+                b = (Math.floor(Math.random() * 10) + 10) * common_factor;
             }
-            console.log(a, b);
+
             const gcd = (x, y) => {
                 while (y !== 0) {
                     [x, y] = [y, x % y];
                 }
                 return x;
             };
+
             const lcm = (x, y) => (x * y) / gcd(x, y);
-            const gcd_or_lcm = Math.random() < 0.5
+            const gcd_or_lcm = Math.random() < 0.5;
 
-            const correctAnswer =  gcd_or_lcm ? gcd(a, b) : lcm(a, b);
+            const correctAnswer = gcd_or_lcm ? gcd(a, b) : lcm(a, b);
             const questionText = `Find the ${gcd_or_lcm ? 'GCD' : 'LCM'} of ${a} and ${b}`;
-            console.log("Current question: a:", a, "b: ", b);
 
-            const options = [];
-            const variance = Math.floor(correctAnswer * 0.4); // 20% of the correct answer as variance
+            const options = new Set(); // Use a Set to ensure uniqueness
+            options.add(correctAnswer); // Always include the correct answer
 
-            while (options.length < 4) {
-                // Generate options around the correct answer
-                const offset = Math.floor(Math.random() * (2 * variance + 1)) - variance; // Random number within ±variance
-                const option = correctAnswer + offset;
+            while (options.size < 4) {
+                const variation = Math.max(1, Math.floor(correctAnswer * 0.5)); // Ensure variation is at least 1
+                const randomOffset = Math.floor(Math.random() * (2 * variation + 1)) - variation;
+                const option = correctAnswer + randomOffset;
 
-                // Avoid duplicates and negative options
-                if (!options.includes(option) && option > 0) {
-                    options.push(option);
+                if (option > 0) {
+                    options.add(option);
                 }
-        }
-            if (!options.includes(correctAnswer)) options[Math.floor(Math.random() * 4)] = correctAnswer;
+            }
 
-            return { questionText, options, correctAnswer };
+            // Convert Set to an array and shuffle it
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+            return { questionText, options: shuffledOptions, correctAnswer };
         }
+
 
         function startQuiz() {
             timePerQuestion = 120;
