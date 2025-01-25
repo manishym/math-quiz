@@ -113,13 +113,15 @@
             const a = (Math.floor(Math.random() * 10) + 1) * common_factor
             let b = (Math.floor(Math.random() * 10) + 10) * common_factor
             while (b == a) {
-                let b = (Math.floor(Math.random() * 10) + 10) * common_factor
+                b = (Math.floor(Math.random() * 10) + 10) * common_factor
             }
             console.log(a, b);
             const gcd = (x, y) => {
-                console.log(x, y);
-                return y === 0 ? x : gcd(y, x % y)
-            }; 
+                while (y !== 0) {
+                    [x, y] = [y, x % y];
+                }
+                return x;
+            };
             const lcm = (x, y) => (x * y) / gcd(x, y);
             const gcd_or_lcm = Math.random() < 0.5
 
@@ -128,7 +130,7 @@
             console.log("Current question: a:", a, "b: ", b);
 
             const options = [];
-            const variance = Math.floor(correctAnswer * 0.2); // 20% of the correct answer as variance
+            const variance = Math.floor(correctAnswer * 0.4); // 20% of the correct answer as variance
 
             while (options.length < 4) {
                 // Generate options around the correct answer
@@ -146,19 +148,19 @@
         }
 
         function startQuiz() {
-            
-            numQuestions = 25;
-            timePerQuestion = 180;
-            timeLeft = timePerQuestion*numQuestions
+            timePerQuestion = 120;
+            numQuestions = 20;
             questions = Array.from({ length: numQuestions }, generateQuestion);
+            answers = [];
+            timeLeft = timePerQuestion * numQuestions;
 
             document.getElementById('quiz-container').style.display = 'block';
-            document.getElementById('correct-count').textContent = 0;
-            document.getElementById('attempted-count').textContent = 0;
-
             correctAnswers = 0;
             attemptedQuestions = 0;
             currentQuestionIndex = 0;
+
+            document.getElementById('correct-count').textContent = 0;
+            document.getElementById('attempted-count').textContent = 0;
 
             updateProgressBars();
             loadQuestion();
@@ -209,15 +211,16 @@
         }
 
         function updateTimer() {
-            console.log("Total time: ", timePerQuestion*numQuestions, " current time left: ", timeLeft)
             if (timeLeft <= 0) {
-                handleAnswer(null); // Timeout treated as an incorrect answer
-            } else {
-                timeLeft--;
-                timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
-                timer = setTimeout(updateTimer, 1000);
+                clearTimeout(timer); // Clear the timer to prevent recursion
+                handleAnswer(null); // Mark the question as incorrect
+                return;
             }
+            timeLeft--;
+            timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
+            timer = setTimeout(updateTimer, 1000);
         }
+
 
         function startTimer() {
             timerBar.style.width = '100%';
