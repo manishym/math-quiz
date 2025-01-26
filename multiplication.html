@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Quiz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .icon-right {
+            color: green;
+        }
+        .icon-wrong {
+            color: red;
+        }
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px auto;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .question {
+            margin: 20px 0;
+        }
+        .feedback {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .progress-bar {
+            height: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="text-center my-4">
+        <h1 class="text-primary">Multiplication Quiz</h1>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 offset-md-3">
+           
+
+            <button class="btn btn-primary w-100" onclick="startQuiz()">Start Quiz</button>
+        </div>
+    </div>
+
+    <div id="quiz-container" style="display:none;">
+        <div class="row mb-3">
+            <div class="col-md-8 offset-md-2">
+                <div id="timer-bar" class="progress">
+                    <div id="timer-progress" class="progress-bar bg-success" role="progressbar"></div>
+                </div>
+                <div id="question-progress-bar" class="progress mt-2">
+                    <div id="question-progress" class="progress-bar bg-info" role="progressbar"></div>
+                </div>
+            </div>
+        </div>
+        <div id="question-container" class="row mb-4 text-center"></div>
+        <p id="feedback" class="text-center feedback text-success"></p>
+        <div class="row text-center mt-4">
+            <div class="col">
+                <p><strong>Correct Answers:</strong> <span id="correct-count">0</span></p>
+            </div>
+            <div class="col">
+                <p><strong>Attempted Questions:</strong> <span id="attempted-count">0</span></p>
+            </div>
+        </div>
+    </div>
+    <table id="arrayTable">
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Answer Selected</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
+        let questions = [], timePerQuestion, numQuestions;
+        var timeLeft;
+        const timerBar = document.getElementById('timer-progress');
+
+
+
+
+        function generateQuestion() {
+            const a = (Math.floor(Math.random() * 10000) + 1)
+            let b = (Math.floor(Math.random() * 10000) + 1) 
+
+            while (b === a) {
+                b = (Math.floor(Math.random() * 10000) + 1) 
+            }
+
+            const correctAnswer = a * b;
+            const questionText = `Find the product of ${a} and ${b}`;
+
+            const options = new Set(); // Use a Set to ensure uniqueness
+            options.add(correctAnswer); // Always include the correct answer
+
+            while (options.size < 4) {
+                
+                let randomOffset = (a%10 * b %10) * (Math.floor(Math.random() * 10) + 1);
+                if (randomOffset == 0){
+                    randomOffset = 10 * (Math.floor(Math.random() * 10) + 1);
+                }
+                const option = correctAnswer + randomOffset;
+
+                if (option > 0) {
+                    options.add(option);
+                }
+            }
+
+            // Convert Set to an array and shuffle it
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+
+            return { questionText, options: shuffledOptions, correctAnswer };
+        }
+
+
+        function startQuiz() {
+            timePerQuestion = 120;
+            numQuestions = 20;
+            questions = Array.from({ length: numQuestions }, generateQuestion);
+            answers = [];
+            timeLeft = timePerQuestion * numQuestions;
+
+            document.getElementById('quiz-container').style.display = 'block';
+            correctAnswers = 0;
+            attemptedQuestions = 0;
+            currentQuestionIndex = 0;
+
+            document.getElementById('correct-count').textContent = 0;
+            document.getElementById('attempted-count').textContent = 0;
+
+            updateProgressBars();
+            loadQuestion();
+            startTimer();
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endQuiz();
+                return;
+            }
+
+            const questionData = questions[currentQuestionIndex];
+            const container = document.getElementById('question-container');
+
+            container.innerHTML = `<div class="col-12 question"><h5>${questionData.questionText}</h5></div>`;
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = "btn btn-outline-primary mx-2 mt-2";
+                button.onclick = () => handleAnswer(option);
+                container.appendChild(button);
+            });
+            updateTimer();
+
+            
+        }
+
+        function handleAnswer(selectedOption) {
+            clearTimeout(timer);
+            const questionData = questions[currentQuestionIndex];
+            attemptedQuestions++;
+
+            if (selectedOption === questionData.correctAnswer) {
+                correctAnswers++;
+                document.getElementById('feedback').textContent = 'Correct!';
+                document.getElementById('feedback').classList.replace('text-danger', 'text-success');
+            } else {
+                document.getElementById('feedback').textContent = `Incorrect! The correct answer was ${questionData.correctAnswer}.`;
+                document.getElementById('feedback').classList.replace('text-success', 'text-danger');
+            }
+            answers.push({questionData, selectedOption, selectedOption})
+
+            currentQuestionIndex++;
+            updateProgressBars();
+            loadQuestion();
+            renderTable();
+        }
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                clearTimeout(timer); // Clear the timer to prevent recursion
+                handleAnswer(null); // Mark the question as incorrect
+                return;
+            }
+            timeLeft--;
+            timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
+            timer = setTimeout(updateTimer, 1000);
+        }
+
+
+        function startTimer() {
+            timerBar.style.width = '100%';
+            updateTimer();
+        }
+
+        function updateProgressBars() {
+            const questionProgress = document.getElementById('question-progress');
+            const attemptedCount = document.getElementById('attempted-count');
+            const correctCount = document.getElementById('correct-count');
+
+            questionProgress.style.width = `${(currentQuestionIndex / numQuestions) * 100}%`;
+            attemptedCount.textContent = attemptedQuestions;
+            correctCount.textContent = correctAnswers;
+        }
+
+        function endQuiz() {
+            document.getElementById('question-container').innerHTML = '<div class="text-success feedback">Quiz Over! Well Done!</div>';
+            clearTimeout(timer);
+        }
+
+        function renderTable() {
+            const tableBody = document.querySelector("#arrayTable tbody");
+            tableBody.innerHTML = ""; // Clear existing table rows
+
+            answers.forEach((value, index) => {
+                const row = document.createElement("tr");
+
+                // Create and append the index cell
+                const indexCell = document.createElement("td");
+                console.log(value);
+                indexCell.textContent = value.questionData.questionText
+                row.appendChild(indexCell);
+
+                // Create and append the value cell
+                const valueCell = document.createElement("td");
+                valueCell.textContent = value.selectedOption;
+                row.appendChild(valueCell);
+                const resultCell = document.createElement("td");
+                correct = value.selectedOption == value.questionData.correctAnswer
+                resultCell.innerHTML = correct? '<span class="icon-right">✓</span>': '<span class="icon-wrong">✗</span>';
+                row.classList.add(correct?"icon-right":"icon-wrong")
+                row.appendChild(resultCell);
+
+
+                // Append the row to the table body
+                tableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
