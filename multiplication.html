@@ -99,7 +99,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
+
+        
+let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
         let questions = [], timePerQuestion, numQuestions;
         var timeLeft;
         const timerBar = document.getElementById('timer-progress');
@@ -108,11 +110,11 @@
 
 
         function generateQuestion() {
-            const a = (Math.floor(Math.random() * 10000) + 1)
-            let b = (Math.floor(Math.random() * 10000) + 1) 
+            const a = (Math.floor(Math.random() * 100) + 1)
+            let b = (Math.floor(Math.random() * 100) + 1) 
 
             while (b === a) {
-                b = (Math.floor(Math.random() * 10000) + 1) 
+                b = (Math.floor(Math.random() * 100) + 1) 
             }
 
             const correctAnswer = a * b;
@@ -142,7 +144,7 @@
 
 
         function startQuiz() {
-            timePerQuestion = 120;
+            timePerQuestion = 240;
             numQuestions = 20;
             questions = Array.from({ length: numQuestions }, generateQuestion);
             answers = [];
@@ -211,6 +213,8 @@
                 return;
             }
             timeLeft--;
+            console.log();
+            console.log(timeLeft);
             timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
             timer = setTimeout(updateTimer, 1000);
         }
