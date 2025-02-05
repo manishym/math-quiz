@@ -63,6 +63,7 @@
             <button class="btn btn-primary w-100" onclick="startQuiz()">Start Quiz</button>
         </div>
     </div>
+    <div class="timer">Time Remaining: <span id="timer">50:00</span></div>
 
     <div id="quiz-container" style="display:none;">
         <div class="row mb-3">
@@ -96,9 +97,11 @@
         </thead>
         <tbody></tbody>
     </table>
+    <script src="timer.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        TIME_PER_QUESTION = 30;
         let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
         let questions = [], timePerQuestion, numQuestions;
         var timeLeft;
@@ -151,7 +154,7 @@
 
 
         function startQuiz() {
-            timePerQuestion = 240;
+            timePerQuestion = 120;
             numQuestions = 20;
             questions = Array.from({ length: numQuestions }, generateQuestion);
             answers = [];
@@ -167,6 +170,7 @@
 
             updateProgressBars();
             loadQuestion();
+            timerElement.textContent = `${Math.floor(timeLeft / 60).toString().padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`;
             startTimer();
         }
 
@@ -187,13 +191,11 @@
                 button.onclick = () => handleAnswer(option);
                 container.appendChild(button);
             });
-            updateTimer();
 
             
         }
 
         function handleAnswer(selectedOption) {
-            clearTimeout(timer);
             const questionData = questions[currentQuestionIndex];
             attemptedQuestions++;
 
@@ -213,22 +215,6 @@
             renderTable();
         }
 
-        function updateTimer() {
-            if (timeLeft <= 0) {
-                clearTimeout(timer); // Clear the timer to prevent recursion
-                handleAnswer(null); // Mark the question as incorrect
-                return;
-            }
-            timeLeft--;
-            timerBar.style.width = `${(timeLeft / (timePerQuestion * numQuestions)) * 100}%`;
-            timer = setTimeout(updateTimer, 1000);
-        }
-
-
-        function startTimer() {
-            timerBar.style.width = '100%';
-            updateTimer();
-        }
 
         function updateProgressBars() {
             const questionProgress = document.getElementById('question-progress');

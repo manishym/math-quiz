@@ -12,6 +12,9 @@
   <div class="timer">Time Remaining: <span id="timer">50:00</span></div>
   <div class="container">
     <div class="left-panel">
+      <div id="timer-bar" class="progress">
+        <div id="timer-progress" class="progress-bar bg-success" role="progressbar"></div>
+    </div>
       <canvas id="progress-chart"></canvas>
       <div class="scoreboard">
         Current Score: <span class="score" id="current-score">0</span> / <span id="answered-questions">0</span>
@@ -32,7 +35,11 @@
     <p class="score" id="final-score"></p>
     <button onclick="location.reload()">Restart</button>
   </div>
-
+  <script src="timer.js"></script>
   <script src="script.js"></script>
+  <script>
+    timePerQuestion = TIME_PER_QUESTION;
+    numQuestions = TOTAL_QUESTIONS;
+  </script>
 </body>
 </html>

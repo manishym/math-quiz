@@ -7,7 +7,6 @@ TIME_PER_QUESTION = 30; // Time per question in seconds
 const TOTAL_YES_QUESTIONS = Math.floor((TOTAL_QUESTIONS * PERCENT_YES_ANSWERS) / 100);
 const TOTAL_NO_QUESTIONS = TOTAL_QUESTIONS - TOTAL_YES_QUESTIONS;
 
-const timerElement = document.getElementById("timer");
 const questionElement = document.getElementById("question");
 const questionNumberElement = document.getElementById("question-number");
 const feedbackElement = document.getElementById("feedback");
@@ -88,19 +87,7 @@ function generateQuestions() {
   questions.sort(() => Math.random() - 0.5); // Shuffle questions
 }
 
-// Timer
-function startTimer() {
-  timer = setInterval(() => {
-    timeLeft--;
-    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-    const seconds = (timeLeft % 60).toString().padStart(2, "0");
-    timerElement.textContent = `${minutes}:${seconds}`;
 
-    if (timeLeft <= 0) {
-      endQuiz();
-    }
-  }, 1000);
-}
 
 // Load Next Question
 function loadQuestion() {
