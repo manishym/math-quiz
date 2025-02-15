@@ -101,7 +101,11 @@
     </table>
     <script src="timer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
     <script>
+    
 
         
 let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0, answers = [];
@@ -109,32 +113,100 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
         var timeLeft;
         const timerBar = document.getElementById('timer-progress');
 
+        function gcd(a, b) {
+            if (b == 0) {
+                return a;
+            }
+            return gcd(b, a % b);
+        }
 
+        function toMj(fraction) {
+            const { whole, numerator, denominator } = fraction;
+
+            // If the numerator is 0, return only the whole part
+            if (numerator === 0) {
+                return `\\( ${whole} \\)`;
+            }
+
+            // If the whole part is 0, return only the fraction
+            if (whole === 0) {
+                return `\\( \\frac{${numerator}}{${denominator}} \\)`;
+            }
+
+            // Otherwise, return mixed fraction
+            return `\\( ${whole} \\frac{${numerator}}{${denominator}} \\)`;
+        }
+
+        function imMx(numerator, denominator) {
+            if (denominator === 0) {
+                throw new Error("Denominator cannot be zero");
+            }
+
+            let whole = Math.floor(numerator / denominator);
+            let remainder = numerator % denominator;
+
+            return { 
+                whole: whole, 
+                numerator: remainder, 
+                denominator: denominator 
+            };
+        }
 
 
         function generateQuestion() {
-            const a = (Math.floor(Math.random() * 1000) + 1)
-            let b = (Math.floor(Math.random() * 100) + 1) 
+            let a = Math.floor(Math.random() * 9) + 1;
+            let b = Math.floor(Math.random() * 9) + 1;
+            let c = Math.floor(Math.random() * 9) + 1;
+            let d = Math.floor(Math.random() * 9) + 1;
+            let commonDenom = b * d;
+            let numerator = a * d + c * b;
+            let divisor = gcd(numerator, commonDenom);
+            let correctAnswer = { num: numerator / divisor, den: commonDenom / divisor };
 
-            while (b === a) {
-                b = (Math.floor(Math.random() * 100) + 1) 
+            let options = new Set();
+            options.add(correctAnswer);
+            while (options.size < 4) {
+                let randomOffset = Math.floor(Math.random() * 5) + 1;
+                options.add({ num: correctAnswer.num + randomOffset, den: correctAnswer.den });
             }
 
-            const correctAnswer = a * b;
-            const questionText = `Find the product of ${a} and ${b}`;
+            let shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            f1 = toMj(imMx(a, b));
+            f2 = toMj(imMx(c, d));
+            return { question: `What is ${f1} + ${f2}?`, options: shuffledOptions, answer: correctAnswer };
+        }
+/*
+
+        function generateQuestion() {
+            const primes = [2, 3, 5, 7, 11, 13, 17]
+            const cf = primes[Math.floor(Math.random() * primes.length)];
+            let a = Math.floor(Math.random() * 5) + 1 * cf;
+            let b = Math.floor(Math.random() * 5) + 1 * cf;
+            let c = Math.floor(Math.random() * 5) + 1 * cf;
+            let d = Math.floor(Math.random() * 5) + 1 * cf;
+
+            if (a > b) {
+                [a, b] = [b, a];
+            }
+            if (c > d) {
+                [c, d] = [d, c];
+            }
+
+
+            const questionText = `What is \( \frac{${a}}{${b}} + \frac{${c}}{${d}} \)?`;
+            g = gcd(b, d)
+            answer = {num: (a*d + c*b)/g, den: (b*d)/g}
+
 
             const options = new Set(); // Use a Set to ensure uniqueness
-            options.add(correctAnswer); // Always include the correct answer
+            options.add(answer); // Always include the correct answer
 
             while (options.size < 4) {
                 
-                let randomOffset = (a%10 * b %10) * (Math.floor(Math.random() * 10) + 1);
-                if (randomOffset == 0){
-                    randomOffset = 10 * (Math.floor(Math.random() * 10) + 1);
-                }
-                const option = correctAnswer + randomOffset;
+                let randomOffset = (Math.floor(Math.random() * 10) + 1);
+                const option = {num: answer.num + randomOffset, den: answer.den};
 
-                if (option > 0) {
+                if (option.num > 0) {
                     options.add(option);
                 }
             }
@@ -142,10 +214,10 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
             // Convert Set to an array and shuffle it
             const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
 
-            return { questionText, options: shuffledOptions, correctAnswer };
+            return { questionText, options: shuffledOptions, answer };
         }
-
-
+*/
+        let currentQuestion = generateQuestion();
         function startQuiz() {
             timePerQuestion = 120;
             numQuestions = 20;
@@ -175,14 +247,17 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
             const questionData = questions[currentQuestionIndex];
             const container = document.getElementById('question-container');
 
-            container.innerHTML = `<div class="col-12 question"><h5>${questionData.questionText}</h5></div>`;
-            questionData.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.textContent = option;
+            container.innerHTML = document.getElementById("question-container").innerHTML = `<div class="col-12 question"><h5>${currentQuestion.question}</h5></div>`;
+            let optionsContainer = document.getElementById("question-container");
+            currentQuestion.options.forEach(option => {
+                let button = document.createElement("button");
+                f = toMj(imMx(option.num, option.den));
+                button.innerHTML = `${f}`;
                 button.className = "btn btn-outline-primary mx-2 mt-2";
                 button.onclick = () => handleAnswer(option);
-                container.appendChild(button);
-            });            
+                optionsContainer.appendChild(button);
+            });
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
         }
 
         function handleAnswer(selectedOption) {
