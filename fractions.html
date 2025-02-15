@@ -138,6 +138,7 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
         }
 
         function imMx(numerator, denominator) {
+            console.log(numerator, denominator);
             if (denominator === 0) {
                 throw new Error("Denominator cannot be zero");
             }
@@ -161,7 +162,10 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
             let commonDenom = b * d;
             let numerator = a * d + c * b;
             let divisor = gcd(numerator, commonDenom);
-            let correctAnswer = { num: numerator / divisor, den: commonDenom / divisor };
+            let correctAnswer = { 
+                num: Math.floor(numerator / divisor), 
+                den: Math.floor(commonDenom / divisor) 
+            };
 
             let options = new Set();
             options.add(correctAnswer);
@@ -173,7 +177,9 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
             let shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
             f1 = toMj(imMx(a, b));
             f2 = toMj(imMx(c, d));
-            return { question: `What is ${f1} + ${f2}?`, options: shuffledOptions, answer: correctAnswer };
+            console.log(correctAnswer, shuffledOptions);
+            return { question: `What is ${f1} + ${f2}?`, options: shuffledOptions, correctAnswer
+                : correctAnswer };
         }
 /*
 
@@ -269,7 +275,7 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
                 document.getElementById('feedback').textContent = 'Correct!';
                 document.getElementById('feedback').classList.replace('text-danger', 'text-success');
             } else {
-                document.getElementById('feedback').textContent = `Incorrect! The correct answer was ${questionData.correctAnswer}.`;
+                document.getElementById('feedback').textContent = `Incorrect! The correct answer was ${toMj(imMx(questionData.correctAnswer.num, questionData.correctAnswer.den))}.`;
                 document.getElementById('feedback').classList.replace('text-success', 'text-danger');
             }
             answers.push({questionData, selectedOption, selectedOption})
@@ -305,12 +311,12 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
                 // Create and append the index cell
                 const indexCell = document.createElement("td");
                 console.log(value);
-                indexCell.textContent = value.questionData.questionText
+                indexCell.innerHTML = value.questionData.question
                 row.appendChild(indexCell);
 
                 // Create and append the value cell
                 const valueCell = document.createElement("td");
-                valueCell.textContent = value.selectedOption;
+                valueCell.innerHTML = toMj(imMx(value.selectedOption.num, value.selectedOption.den));
                 row.appendChild(valueCell);
                 const resultCell = document.createElement("td");
                 correct = value.selectedOption == value.questionData.correctAnswer
@@ -321,6 +327,7 @@ let timer, currentQuestionIndex = 0, correctAnswers = 0, attemptedQuestions = 0,
 
                 // Append the row to the table body
                 tableBody.appendChild(row);
+                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
             });
         }
     </script>
